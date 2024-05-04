@@ -2,7 +2,7 @@ use reqwest::Client;
 use serde_json::json;
 use worker::{console_debug, console_warn};
 
-pub async fn send(endpoint: String, client: &Client) {
+pub async fn send(client: &Client, endpoint: &str) {
     let req = json!({ });
 
     let res = client
