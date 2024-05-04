@@ -18,6 +18,4 @@ fallthrough = false
 crons = ["0 22 * * *"]
 
 [env.local.vars]
-GOOGLE_APIKEY = "FILL THAT"
-GOOGLE_CALENDAR_ID = "FILL THAT"
 ENDPOINT = "http://localhost:8080"

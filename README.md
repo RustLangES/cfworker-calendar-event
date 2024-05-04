@@ -25,6 +25,12 @@ Para construir y desplegar este proyecto, necesitarás lo siguiente:
 
 ### Variables de Entorno
 
+> [!IMPORTANT]
+> Durante la etapa de desarrollo la variable de ENDPOINT puedes modificarla en el archivo `wrangler.toml`
+> Sin embargo las variables sensibles deben ir en el archivo `.dev.vars`
+
+- `GOOGLE_APIKEY`: Token de API de Google para el calendario.
+- `GOOGLE_CALENDAR_ID`: ID del calendario de Google a seguir.
 - `ENDPOINT`: URL del punto final al que se enviarán los datos del reto diario.
 
 ### Pruebas Locales

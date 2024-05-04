@@ -25,6 +25,12 @@ To build and deploy this project, you will need the following:
 
 ### Environment Variables
 
+> [!IMPORTANT]
+> During the development stage the ENDPOINT variable can be modified in the `wrangler.toml` file.
+> However the sensitive variables must be in the `.dev.vars` file.
+
+- `GOOGLE_APIKEY`: Google API token for the calendar.
+- `GOOGLE_CALENDAR_ID`: Google calendar ID to follow.
 - `ENDPOINT`: URL of the endpoint to which the daily challenge data will be sent.
 
 ### Local Tests
@@ -40,7 +46,7 @@ To test the worker locally, you only need to set the `ENDPOINT` environment vari
 This project is configured to deploy automatically using GitHub Actions workflows. For it to work correctly, you must configure the following secrets on GitHub:
 
 - `CLOUDFLARE_ACCOUNT_ID`: ID of your Cloudflare account.
-- CLOUDFLARE_API_TOKEN`: Cloudflare API token.
-- GOOGLE_APIKEY`: Google API token for the calendar.
-- GOOGLE_CALENDAR_ID`: Google calendar ID to follow.
+- `CLOUDFLARE_API_TOKEN`: Cloudflare API token.
+- `GOOGLE_APIKEY`: Google API token for the calendar.
+- `GOOGLE_CALENDAR_ID`: Google calendar ID to follow.
 - `ENDPOINT`: API URL to which the daily challenge data will be sent.
