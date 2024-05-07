@@ -1,5 +1,5 @@
 {
-  description = "A rust worker";
+  description = "Calendar worker";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     cranix.url = "github:Lemin-n/cranix/2af6b2e71577bb8836b10e28f3267f2c5342a8fd";
@@ -16,7 +16,7 @@
   } @ inputs:
     flake-utils.lib.eachSystem (flake-utils.lib.defaultSystems) (
       system: let
-        workerBundle = import ./. {
+        calendarBundle = import ./. {
           inherit system;
           pkgs = nixpkgs.legacyPackages.${system};
           crane = inputs.crane.lib;
@@ -24,7 +24,7 @@
           fenix = inputs.fenix.packages;
         };
       in {
-        inherit (workerBundle) apps devShells;
+        inherit (calendarBundle) apps devShells;
       }
     );
 }

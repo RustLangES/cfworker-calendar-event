@@ -21,6 +21,7 @@ in
     crane,
     cranix,
     fenix,
+    stdenv ? pkgs.stdenv,
     ...
   }: let
     # fenix: rustup replacement for reproducible builds
@@ -38,7 +39,40 @@ in
       openssl
     ];
 
+    # Base args, need for build all crate artifacts and caching this for late builds
+    deps = {
+      nativeBuildInputs = with pkgs;
+        [
+          pkg-config
+          autoPatchelfHook
+        ]
+        ++ lib.optionals stdenv.buildPlatform.isDarwin [
+          pkgs.libiconv
+        ]
+        ++ lib.optionals stdenv.buildPlatform.isLinux [
+          pkgs.libxkbcommon.dev
+        ];
+      inherit buildInputs;
+    };
+
+    # Lambda for build packages with cached artifacts
+    commonArgs = targetName:
+      deps
+      // {
+        pname = targetName;
+        src = lib.cleanSourceWith {
+          src = craneLib.path ./.;
+          filter = craneLib.filterCargoSources;
+        };
+        doCheck = false;
+      };
+      cfApp = cranixLib.buildCranixBundle (commonArgs "");
   in {
+    # `nix run`
+    apps = rec {
+      cf = cfApp.app;
+      default = cf;
+    };
     # `nix develop`
     devShells.default = cranixLib.devShell {
       packages = with pkgs;
