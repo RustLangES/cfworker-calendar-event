@@ -117,7 +117,7 @@ fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDateType
         diff.whole_hours()
     );
 
-    if diff.whole_days() == -3 {
+    if diff.whole_days() == -3 && now.hour() == 22 {
         return Some(EventDateType::ThreeDays);
     }
     if diff.whole_hours() <= 1 && diff.whole_hours() >= 0 {
