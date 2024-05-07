@@ -1,13 +1,19 @@
 use reqwest::ClientBuilder;
 use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
-use worker::{console_debug, event, Env, ScheduleContext, ScheduledEvent};
+use worker::{event, Env, ScheduleContext, ScheduledEvent};
 
 mod calendar;
 mod cangrebot;
 
 #[cfg(target_arch = "wasm32")]
-use worker::console_error;
+use worker::{console_debug, console_error};
+
+#[derive(Debug, PartialEq, Eq)]
+enum EventDateType {
+    ThreeDays,
+    OneHour,
+}
 
 #[event(scheduled)]
 pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
@@ -32,6 +38,25 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
         .map(|e| e.to_string())
         .expect("Calendar Google API Secret not found");
 
+    let channel = env
+        .secret("CHANNEL_ID")
+        .map(|e| {
+            e.to_string()
+                .parse::<i64>()
+                .expect("Cannot parse CHANNEL_ID")
+        })
+        .expect("Calendar Google API Secret not found");
+
+    let roles = env
+        .secret("ROLES")
+        .map(|e| {
+            e.to_string()
+                .split_terminator(';')
+                .map(|r| r.parse::<i64>().expect(&format!("Cannot parse role '{r}'")))
+                .collect::<Vec<_>>()
+        })
+        .expect("Calendar Google API Secret not found");
+
     let client = ClientBuilder::default()
         .build()
         .expect("Cannot build client reqwest");
@@ -43,8 +68,7 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
         .expect("Cannot get the next days");
 
     // Get events
-    // TODO: filter and map events
-    let events = calendar::get(
+    let get = calendar::get(
         &client,
         &calendar_id,
         &calendar_api,
@@ -53,25 +77,36 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
             .format(&Rfc3339)
             .expect("Cannot format max_date (next 3 days)"),
     )
-    .await
-    .iter()
-    .filter(|e| compare_dates(&e.start.date_time, &now));
+    .await;
 
-    cangrebot::send(&client, &endpoint).await;
+    let (three_days, one_hour): (Vec<(_, _)>, Vec<(_, _)>) = get
+        .iter()
+        .filter_map(|e| compare_dates(&e.start.date_time, &now).map(|ev| (ev, e.clone())))
+        .partition(|(ev, _)| ev == &EventDateType::ThreeDays);
+
+    cangrebot::build_message(&client, &endpoint, &three_days, &one_hour, &roles, channel).await;
 }
 
-fn compare_dates(event_date: &str, now: &OffsetDateTime) -> bool {
+fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDateType> {
     let event_date = OffsetDateTime::parse(event_date, &Rfc3339)
         .expect(&format!("Cannot parse date {event_date}"));
     let diff = now.date() - event_date.date();
 
+    #[cfg(target_arch = "wasm32")]
     console_debug!(
         "Days: {} - Hours: {}",
         diff.whole_days(),
         diff.whole_hours()
     );
 
-    diff.whole_days() == -3 || diff.whole_hours() <= 1 && diff.whole_hours() >= 0
+    if diff.whole_days() == -3 {
+        return Some(EventDateType::ThreeDays);
+    }
+    if diff.whole_hours() <= 1 && diff.whole_hours() >= 0 {
+        return Some(EventDateType::OneHour);
+    }
+
+    None
 }
 
 #[cfg(test)]
@@ -79,7 +114,7 @@ mod test {
     use time::format_description::well_known::Rfc3339;
     use time::{Date, Duration, OffsetDateTime, Time};
 
-    use crate::compare_dates;
+    use crate::{compare_dates, EventDateType};
 
     #[test]
     fn test_format_date_rfc3339() {
@@ -113,16 +148,16 @@ mod test {
         let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
         let res = compare_dates("2024-05-09T00:00:00Z", &d);
 
-        assert!(!res);
+        assert!(res.is_none());
     }
 
     #[test]
-    fn compare_dates_tree_days() {
+    fn compare_dates_three_days() {
         let d = Date::from_calendar_date(2024, time::Month::May, 6).unwrap();
         let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
         let res = compare_dates("2024-05-09T00:00:00Z", &d);
 
-        assert!(res);
+        assert_eq!(res, Some(EventDateType::ThreeDays));
     }
 
     #[test]
@@ -131,15 +166,6 @@ mod test {
         let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
         let res = compare_dates("2024-05-09T01:10:00Z", &d);
 
-        assert!(res);
-    }
-
-    #[test]
-    fn compare_dates_thirty_minutes() {
-        let d = Date::from_calendar_date(2024, time::Month::May, 9).unwrap();
-        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
-        let res = compare_dates("2024-05-09T00:34:00Z", &d);
-
-        assert!(res);
+        assert_eq!(res, Some(EventDateType::OneHour));
     }
 }
