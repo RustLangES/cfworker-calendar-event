@@ -47,6 +47,15 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
         })
         .expect("Calendar Google API Secret not found");
 
+    let bot_channel = env
+        .secret("BOT_CHANNEL_ID")
+        .map(|e| {
+            e.to_string()
+                .parse::<i64>()
+                .expect("Cannot parse CHANNEL_ID")
+        })
+        .expect("Calendar Google API Secret not found");
+
     let roles = env
         .secret("ROLES")
         .map(|e| {
@@ -84,7 +93,16 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
         .filter_map(|e| compare_dates(&e.start.date_time, &now).map(|ev| (ev, e.clone())))
         .partition(|(ev, _)| ev == &EventDateType::ThreeDays);
 
-    cangrebot::build_message(&client, &endpoint, &three_days, &one_hour, &roles, channel).await;
+    cangrebot::build_message(
+        &client,
+        &endpoint,
+        &three_days,
+        &one_hour,
+        &roles,
+        channel,
+        bot_channel,
+    )
+    .await;
 }
 
 fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDateType> {
