@@ -42,6 +42,9 @@ jobs:
           ENDPOINT: ${{ secrets.ENDPOINT }}
           GOOGLE_APIKEY: ${{ secrets.GOOGLE_APIKEY }}
           GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+          BOT_CHANNEL_ID: ${{ secrets.BOT_CHANNEL_ID }}
+          ROLES: ${{ secrets.ROLES }}
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
