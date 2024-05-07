@@ -3,14 +3,14 @@ use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
 use worker::{event, Env, ScheduleContext, ScheduledEvent};
 
-mod calendar;
-mod cangrebot;
+pub mod calendar;
+pub mod cangrebot;
 
 #[cfg(target_arch = "wasm32")]
 use worker::{console_debug, console_error};
 
 #[derive(Debug, PartialEq, Eq)]
-enum EventDateType {
+pub enum EventDateType {
     ThreeDays,
     OneHour,
 }
@@ -105,7 +105,7 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
     .await;
 }
 
-fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDateType> {
+pub fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDateType> {
     let event_date = OffsetDateTime::parse(event_date, &Rfc3339)
         .expect(&format!("Cannot parse date {event_date}"));
     let diff = now.date() - event_date.date();
@@ -125,65 +125,4 @@ fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDateType
     }
 
     None
-}
-
-#[cfg(test)]
-mod test {
-    use time::format_description::well_known::Rfc3339;
-    use time::{Date, Duration, OffsetDateTime, Time};
-
-    use crate::{compare_dates, EventDateType};
-
-    #[test]
-    fn test_format_date_rfc3339() {
-        let d = Date::from_calendar_date(2024, time::Month::May, 6).unwrap();
-        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT).format(&Rfc3339);
-
-        assert!(d.is_ok());
-
-        let d = d.unwrap();
-        assert_eq!(d.as_str(), "2024-05-06T00:00:00Z");
-    }
-
-    #[test]
-    fn test_format_next_date_rfc3339() {
-        let d = Date::from_calendar_date(2024, time::Month::May, 6).unwrap();
-        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
-
-        let d = d.checked_add(Duration::days(3));
-        assert!(d.is_some());
-
-        let d = d.unwrap();
-        assert_eq!(d.day(), 9);
-
-        let d = d.format(&Rfc3339);
-        assert_eq!(&d.unwrap(), "2024-05-09T00:00:00Z");
-    }
-
-    #[test]
-    fn compare_dates_more_time() {
-        let d = Date::from_calendar_date(2024, time::Month::May, 5).unwrap();
-        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
-        let res = compare_dates("2024-05-09T00:00:00Z", &d);
-
-        assert!(res.is_none());
-    }
-
-    #[test]
-    fn compare_dates_three_days() {
-        let d = Date::from_calendar_date(2024, time::Month::May, 6).unwrap();
-        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
-        let res = compare_dates("2024-05-09T00:00:00Z", &d);
-
-        assert_eq!(res, Some(EventDateType::ThreeDays));
-    }
-
-    #[test]
-    fn compare_dates_one_hour() {
-        let d = Date::from_calendar_date(2024, time::Month::May, 9).unwrap();
-        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
-        let res = compare_dates("2024-05-09T01:10:00Z", &d);
-
-        assert_eq!(res, Some(EventDateType::OneHour));
-    }
 }
