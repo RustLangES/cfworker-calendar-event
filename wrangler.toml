@@ -14,8 +14,9 @@ fallthrough = false
 # Cron Triggers
 # Docs: https://developers.cloudflare.com/workers/platform/triggers/cron-triggers/
 # Configuration: https://developers.cloudflare.com/workers/wrangler/configuration/#triggers
+# Test url: http://localhost:*/__scheduled?cron=*+*+*+*+*
 [triggers]
-crons = ["0 22 * * *"]
+crons = ["0 * * * *"]
 
 [env.local.vars]
 ENDPOINT = "http://localhost:8080"
