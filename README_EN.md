@@ -35,7 +35,7 @@ To build and deploy this project, you will need the following:
 - `CHANNEL_ID`: Corresponds to the main channel of announcements.
 - `BOT_CHANNEL_ID`: Corresponds to the second channel where the announcements will be made half an hour before.
 - `ROLES`: The roles to be mentioned in discord, must be separated by `;`, e.g.: `1923764917246;12987469283746;1923746927346`.
-- BOT_APIKEY`: Only necessary for our case that we have limited our endpoint for allowed users.
+- `BOT_APIKEY`: Only necessary for our case that we have limited our endpoint for allowed users.
 
 ### Local Tests
 
@@ -57,4 +57,4 @@ This project is configured to deploy automatically using GitHub Actions workflow
 - `CHANNEL_ID`: Corresponds to the main channel of announcements.
 - `BOT_CHANNEL_ID`: Corresponds to the second channel where the announcements will be made half an hour before.
 - `ROLES`: The roles to be mentioned in discord, must be separated by `;`, e.g.: `1923764917246;12987469283746;1923746927346`.
-- BOT_APIKEY`: Only necessary for our case that we have limited our endpoint for allowed users.
+- `BOT_APIKEY`: Only necessary for our case that we have limited our endpoint for allowed users.
