@@ -114,7 +114,7 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
 pub fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDateType> {
     let event_date = OffsetDateTime::parse(event_date, &Rfc3339)
         .expect(&format!("Cannot parse date {event_date}"));
-    let diff = now.date() - event_date.date();
+    let diff = event_date.date() - now.date();
 
     #[cfg(target_arch = "wasm32")]
     console_debug!(
@@ -123,7 +123,7 @@ pub fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDate
         diff.whole_hours()
     );
 
-    if diff.whole_days() == -3 && now.hour() == 22 {
+    if diff.whole_days() == 3 && now.hour() == 22 {
         return Some(EventDateType::ThreeDays);
     }
     if diff.whole_hours() <= 1 && diff.whole_hours() >= 0 {
