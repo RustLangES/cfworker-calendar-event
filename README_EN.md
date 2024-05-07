@@ -31,7 +31,10 @@ To build and deploy this project, you will need the following:
 
 - `GOOGLE_APIKEY`: Google API token for the calendar.
 - `GOOGLE_CALENDAR_ID`: Google calendar ID to follow.
-- `ENDPOINT`: URL of the endpoint to which the daily challenge data will be sent.
+- `ENDPOINT`: URL of the API to which the processed data of the calendars will be sent.
+- `CHANNEL_ID`: Corresponds to the main channel of announcements.
+- `BOT_CHANNEL_ID`: Corresponds to the second channel where the announcements will be made half an hour before.
+- `ROLES`: The roles to be mentioned in discord, must be separated by `;`, e.g.: `1923764917246;12987469283746;1923746927346`.
 
 ### Local Tests
 
@@ -49,4 +52,7 @@ This project is configured to deploy automatically using GitHub Actions workflow
 - `CLOUDFLARE_API_TOKEN`: Cloudflare API token.
 - `GOOGLE_APIKEY`: Google API token for the calendar.
 - `GOOGLE_CALENDAR_ID`: Google calendar ID to follow.
-- `ENDPOINT`: API URL to which the daily challenge data will be sent.
+- `ENDPOINT`: URL of the API to which the processed data of the calendars will be sent.
+- `CHANNEL_ID`: Corresponds to the main channel of announcements.
+- `BOT_CHANNEL_ID`: Corresponds to the second channel where the announcements will be made half an hour before.
+- `ROLES`: The roles to be mentioned in discord, must be separated by `;`, e.g.: `1923764917246;12987469283746;1923746927346`.

@@ -31,7 +31,10 @@ Para construir y desplegar este proyecto, necesitarás lo siguiente:
 
 - `GOOGLE_APIKEY`: Token de API de Google para el calendario.
 - `GOOGLE_CALENDAR_ID`: ID del calendario de Google a seguir.
-- `ENDPOINT`: URL del punto final al que se enviarán los datos del reto diario.
+- `ENDPOINT`: URL de la API a la que se enviarán los datos procesados de los calendarios.
+- `CHANNEL_ID`: Corresponde al canal principal de anuncios.
+- `BOT_CHANNEL_ID`: Corresponde al segundo canal en donde se haran los anuncios de media hora antes.
+- `ROLES`: Los roles a los que se hara mencion en discord, deben estar separados por `;`, ejemplo: `1923764917246;12987469283746;1923746927346`
 
 ### Pruebas Locales
 
@@ -49,4 +52,7 @@ Este proyecto está configurado para desplegar automáticamente utilizando los f
 - `CLOUDFLARE_API_TOKEN`: Token de API de Cloudflare.
 - `GOOGLE_APIKEY`: Token de API de Google para el calendario.
 - `GOOGLE_CALENDAR_ID`: ID del calendario de Google a seguir.
-- `ENDPOINT`: URL de la API a la que se enviarán los datos del reto diario.
+- `ENDPOINT`: URL de la API a la que se enviarán los datos procesados de los calendarios.
+- `CHANNEL_ID`: Corresponde al canal principal de anuncios.
+- `BOT_CHANNEL_ID`: Corresponde al segundo canal en donde se haran los anuncios de media hora antes.
+- `ROLES`: Los roles a los que se hara mencion en discord, deben estar separados por `;`, ejemplo: `1923764917246;12987469283746;1923746927346`
