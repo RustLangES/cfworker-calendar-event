@@ -8,7 +8,7 @@ pub async fn get(
     api_key: &str,
     min_time: &str,
     max_time: &str,
-) -> Calendar {
+) -> Vec<Event> {
     // URL Format details from: https://developers.google.com/calendar/api/v3/reference/events/list
     client
         .get(format!("https://www.googleapis.com/calendar/v3/calendars/{calendar_id}/events?timeMin={min_time}&timeMax={max_time}&timeZone=UTC-0&key={api_key}"))
@@ -16,10 +16,11 @@ pub async fn get(
         .await
         .inspect_err(|e| console_warn!("Reqwest Error: {e:?}"))
         .unwrap()
-        .json()
+        .json::<Calendar>()
         .await
         .inspect_err(|e| console_warn!("Json Error: {e:?}"))
         .unwrap()
+        .items
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
