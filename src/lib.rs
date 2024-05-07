@@ -73,3 +73,73 @@ fn compare_dates(event_date: &str, now: &OffsetDateTime) -> bool {
 
     diff.whole_days() == -3 || diff.whole_hours() <= 1 && diff.whole_hours() >= 0
 }
+
+#[cfg(test)]
+mod test {
+    use time::format_description::well_known::Rfc3339;
+    use time::{Date, Duration, OffsetDateTime, Time};
+
+    use crate::compare_dates;
+
+    #[test]
+    fn test_format_date_rfc3339() {
+        let d = Date::from_calendar_date(2024, time::Month::May, 6).unwrap();
+        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT).format(&Rfc3339);
+
+        assert!(d.is_ok());
+
+        let d = d.unwrap();
+        assert_eq!(d.as_str(), "2024-05-06T00:00:00Z");
+    }
+
+    #[test]
+    fn test_format_next_date_rfc3339() {
+        let d = Date::from_calendar_date(2024, time::Month::May, 6).unwrap();
+        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
+
+        let d = d.checked_add(Duration::days(3));
+        assert!(d.is_some());
+
+        let d = d.unwrap();
+        assert_eq!(d.day(), 9);
+
+        let d = d.format(&Rfc3339);
+        assert_eq!(&d.unwrap(), "2024-05-09T00:00:00Z");
+    }
+
+    #[test]
+    fn compare_dates_more_time() {
+        let d = Date::from_calendar_date(2024, time::Month::May, 5).unwrap();
+        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
+        let res = compare_dates("2024-05-09T00:00:00Z", &d);
+
+        assert!(!res);
+    }
+
+    #[test]
+    fn compare_dates_tree_days() {
+        let d = Date::from_calendar_date(2024, time::Month::May, 6).unwrap();
+        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
+        let res = compare_dates("2024-05-09T00:00:00Z", &d);
+
+        assert!(res);
+    }
+
+    #[test]
+    fn compare_dates_one_hour() {
+        let d = Date::from_calendar_date(2024, time::Month::May, 9).unwrap();
+        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
+        let res = compare_dates("2024-05-09T01:10:00Z", &d);
+
+        assert!(res);
+    }
+
+    #[test]
+    fn compare_dates_thirty_minutes() {
+        let d = Date::from_calendar_date(2024, time::Month::May, 9).unwrap();
+        let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
+        let res = compare_dates("2024-05-09T00:34:00Z", &d);
+
+        assert!(res);
+    }
+}
