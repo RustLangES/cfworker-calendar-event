@@ -2,8 +2,6 @@
   description = "Calendar worker";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    cranix.url = "github:Lemin-n/cranix/2af6b2e71577bb8836b10e28f3267f2c5342a8fd";
-    crane.url = "github:ipetkov/crane";
     fenix.url = "github:nix-community/fenix";
     flake-utils.url = "github:numtide/flake-utils";
   };
@@ -19,12 +17,10 @@
         calendarBundle = import ./. {
           inherit system;
           pkgs = nixpkgs.legacyPackages.${system};
-          crane = inputs.crane.lib;
-          cranix = inputs.cranix.lib;
           fenix = inputs.fenix.packages;
         };
       in {
-        inherit (calendarBundle) apps devShells;
+        inherit (calendarBundle) devShells;
       }
     );
 }
