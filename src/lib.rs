@@ -31,12 +31,12 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
     let calendar_id = env
         .secret("GOOGLE_CALENDAR_ID")
         .map(|e| e.to_string())
-        .expect("Calendar Google API Secret not found");
+        .expect("Calendar Google ID Secret not found");
 
     let endpoint = env
         .secret("ENDPOINT")
         .map(|e| e.to_string())
-        .expect("Calendar Google API Secret not found");
+        .expect("Endpoint Secret not found");
 
     let channel = env
         .secret("CHANNEL_ID")
@@ -45,7 +45,7 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
                 .parse::<i64>()
                 .expect("Cannot parse CHANNEL_ID")
         })
-        .expect("Calendar Google API Secret not found");
+        .expect("Announce Channel ID Secret not found");
 
     let bot_channel = env
         .secret("BOT_CHANNEL_ID")
@@ -54,7 +54,7 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
                 .parse::<i64>()
                 .expect("Cannot parse CHANNEL_ID")
         })
-        .expect("Calendar Google API Secret not found");
+        .expect("Remember Channel ID Secret not found");
 
     let roles = env
         .secret("ROLES")
@@ -64,7 +64,7 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
                 .map(|r| r.parse::<i64>().expect(&format!("Cannot parse role '{r}'")))
                 .collect::<Vec<_>>()
         })
-        .expect("Calendar Google API Secret not found");
+        .expect("Roles to mention Secret not found");
 
     let client = ClientBuilder::default()
         .build()
