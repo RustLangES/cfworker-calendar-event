@@ -98,13 +98,13 @@ pub async fn build_message(
                     .map(|l| format!("📍 Lugar: {l}\n"))
                     .unwrap_or_default(),
             )
-            .replace("@link@", &format!("🖥️ Enlace: {}", e.html_link));
+            .replace("@link@", &format!("🖥️ Enlace: <{}>", e.html_link));
         send(client, endpoint, &msg, roles, channel).await;
     }
 
     let events = one_hour
         .iter()
-        .map(|(_, e)| format!("- [{}]({})", e.summary, e.html_link))
+        .map(|(_, e)| format!("- [{}](<{}>)", e.summary, e.html_link))
         .collect::<Vec<String>>()
         .join("\n");
 
