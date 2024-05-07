@@ -27,7 +27,14 @@ En una hora @start@:
 > **NOTA:** Haciendo click en cada evento pueden ver los detalles en el calendario
 "#;
 
-async fn send(client: &Client, endpoint: &str, message: &str, roles: &[i64], channel: i64) {
+async fn send(
+    client: &Client,
+    endpoint: &str,
+    apikey: &str,
+    message: &str,
+    roles: &[i64],
+    channel: i64,
+) {
     let req = json!({
         "message": message,
         "channelId": channel,
@@ -37,6 +44,7 @@ async fn send(client: &Client, endpoint: &str, message: &str, roles: &[i64], cha
     let res = client
         .post(endpoint)
         .header("content-type", "application/json")
+        .header("Authorization", apikey)
         .body(serde_json::to_string(&req).unwrap())
         .send()
         .await
@@ -53,6 +61,7 @@ async fn send(client: &Client, endpoint: &str, message: &str, roles: &[i64], cha
 pub async fn build_message(
     client: &Client,
     endpoint: &str,
+    apikey: &str,
     three_days: &[(EventDateType, Event)],
     one_hour: &[(EventDateType, Event)],
     roles: &[i64],
@@ -99,7 +108,7 @@ pub async fn build_message(
                     .unwrap_or_default(),
             )
             .replace("@link@", &format!("🖥️ Enlace: <{}>", e.html_link));
-        send(client, endpoint, &msg, roles, channel).await;
+        send(client, endpoint, apikey, &msg, roles, channel).await;
     }
 
     let events = one_hour
@@ -121,5 +130,5 @@ pub async fn build_message(
     let msg = ONE_HOUR
         .replace("@start@", start)
         .replace("@events@", &events);
-    send(client, endpoint, &msg, roles, bot_channel).await;
+    send(client, endpoint, apikey, &msg, roles, bot_channel).await;
 }

@@ -45,6 +45,7 @@ jobs:
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
           BOT_CHANNEL_ID: ${{ secrets.BOT_CHANNEL_ID }}
           ROLES: ${{ secrets.ROLES }}
+          BOT_APIKEY: ${{ secrets.BOT_APIKEY }}
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

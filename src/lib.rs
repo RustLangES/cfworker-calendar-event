@@ -47,6 +47,11 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
         })
         .expect("Announce Channel ID Secret not found");
 
+    let bot_key = env
+        .secret("BOT_APIKEY")
+        .map(|e| e.to_string())
+        .expect("Bot APIKEY Secret not found");
+
     let bot_channel = env
         .secret("BOT_CHANNEL_ID")
         .map(|e| {
@@ -96,6 +101,7 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
     cangrebot::build_message(
         &client,
         &endpoint,
+        &bot_key,
         &three_days,
         &one_hour,
         &roles,

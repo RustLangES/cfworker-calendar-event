@@ -35,6 +35,7 @@ Para construir y desplegar este proyecto, necesitarás lo siguiente:
 - `CHANNEL_ID`: Corresponde al canal principal de anuncios.
 - `BOT_CHANNEL_ID`: Corresponde al segundo canal en donde se haran los anuncios de media hora antes.
 - `ROLES`: Los roles a los que se hara mencion en discord, deben estar separados por `;`, ejemplo: `1923764917246;12987469283746;1923746927346`
+- `BOT_APIKEY`: Solo es necesario para nuestro caso que tenemos limitado nuestro endpoint para usuarios permitidos
 
 ### Pruebas Locales
 
@@ -56,3 +57,4 @@ Este proyecto está configurado para desplegar automáticamente utilizando los f
 - `CHANNEL_ID`: Corresponde al canal principal de anuncios.
 - `BOT_CHANNEL_ID`: Corresponde al segundo canal en donde se haran los anuncios de media hora antes.
 - `ROLES`: Los roles a los que se hara mencion en discord, deben estar separados por `;`, ejemplo: `1923764917246;12987469283746;1923746927346`
+- `BOT_APIKEY`: Solo es necesario para nuestro caso que tenemos limitado nuestro endpoint para usuarios permitidos
