@@ -49,3 +49,11 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          secrets: |
+            ENDPOINT
+            BOT_APIKEY
+            GOOGLE_APIKEY
+            GOOGLE_CALENDAR_ID
+            CHANNEL_ID
+            BOT_CHANNEL_ID
+            ROLES
