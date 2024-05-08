@@ -1,6 +1,7 @@
 <div align="right">
 <a href="./README.md">ES</a>
 </div>
+
 # Calendar Events Worker
 
 This is a Cloudflare worker that runs daily at 22:00 UTC-0. Its function is to get the upcoming events from our google calendar and then sends them in Markdown format to an endpoint defined in the `ENDPOINT` environment variable. In our case, this endpoint corresponds to a Discord bot that notifies interested people with the role of `@announcements` within our discord server.
