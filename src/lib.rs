@@ -15,14 +15,17 @@ pub enum EventDateType {
     OneHour,
 }
 
-#[event(scheduled)]
-pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
+#[event(start)]
+fn start() {
     // Custom panic
     #[cfg(target_arch = "wasm32")]
     std::panic::set_hook(Box::new(|info: &std::panic::PanicInfo| {
-        console_error!("{info}")
+        console_error!("{info}");
     }));
+}
 
+#[event(scheduled)]
+pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
     let calendar_api = env
         .secret("GOOGLE_APIKEY")
         .map(|e| e.to_string())
