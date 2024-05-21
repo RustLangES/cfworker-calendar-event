@@ -82,14 +82,8 @@ pub async fn build_message(
                     .map(|d| format!("{}\n", html_to_md(&d)))
                     .unwrap_or_default(),
             )
-            .replace(
-                "@date@",
-                &format!("📅 Fecha: <t:{timestamp}:D>")
-            )
-            .replace(
-                "@hour@",
-                &format!("🕓 Hora: <t:{timestamp}:t>")
-            )
+            .replace("@date@", &format!("📅 Fecha: <t:{timestamp}:D>"))
+            .replace("@hour@", &format!("🕓 Hora: <t:{timestamp}:t>"))
             .replace(
                 "@location@",
                 &e.location
