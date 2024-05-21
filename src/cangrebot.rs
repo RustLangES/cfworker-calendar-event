@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+
+use html2md::common::get_tag_attr;
+use html2md::{parse_html_custom, TagHandler, TagHandlerFactory};
 use reqwest::Client;
 use serde_json::json;
 use time::format_description::well_known::Rfc3339;
@@ -6,10 +10,6 @@ use worker::{console_debug, console_warn};
 
 use crate::calendar::Event;
 use crate::EventDateType;
-
-const DATE_FORMAT: &str = "📅 Fecha: [day padding:none] de [month repr:long] del [year repr:full]";
-const TIME_FORMAT: &str =
-    "🕓 Hora: [hour padding:zero repr:12]:[minute padding:zero][period case:lower] [zone]";
 
 const THREE_DAYS: &str = r#"@announce@
 
@@ -69,8 +69,9 @@ pub async fn build_message(
     bot_channel: i64,
 ) {
     for (_, e) in three_days {
-        let date = OffsetDateTime::parse(&e.start.date_time, &Rfc3339)
-            .expect(&format!("Cannot parse date {}", e.start.date_time));
+        let timestamp = OffsetDateTime::parse(&e.start.date_time, &Rfc3339)
+            .expect(&format!("Cannot parse date {}", e.start.date_time))
+            .unix_timestamp();
         let msg = THREE_DAYS
             .replace("@announce@", "📢 ¡Este martes 2 de abril!")
             .replace("@title@", &format!("**{}**", e.summary))
@@ -78,27 +79,16 @@ pub async fn build_message(
                 "@description@",
                 &e.description
                     .clone()
-                    .map(|d| format!("{d}\n"))
+                    .map(|d| format!("{}\n", html_to_md(&d)))
                     .unwrap_or_default(),
             )
             .replace(
                 "@date@",
-                &date
-                    .format(
-                        &time::format_description::parse(DATE_FORMAT)
-                            .expect("Cannot parse human format date"),
-                    )
-                    .expect("Cannot format human date"),
+                &format!("📅 Fecha: <t:{timestamp}:D>")
             )
             .replace(
                 "@hour@",
-                &date
-                    .time()
-                    .format(
-                        &time::format_description::parse(TIME_FORMAT)
-                            .expect("Cannot parse human format time"),
-                    )
-                    .expect("Cannot format human time"),
+                &format!("🕓 Hora: <t:{timestamp}:t>")
             )
             .replace(
                 "@location@",
@@ -131,4 +121,37 @@ pub async fn build_message(
         .replace("@start@", start)
         .replace("@events@", &events);
     send(client, endpoint, apikey, &msg, roles, bot_channel).await;
+}
+
+fn html_to_md(s: &str) -> String {
+    let mut custom_parser: HashMap<String, Box<dyn TagHandlerFactory>> = HashMap::new();
+    custom_parser
+        .entry("img".to_owned())
+        .or_insert(Box::new(ImgHandler));
+
+    parse_html_custom(s, &custom_parser)
+}
+struct ImgHandler;
+impl TagHandler for ImgHandler {
+    fn handle(&mut self, tag: &html2md::Handle, printer: &mut html2md::StructuredPrinter) {
+        let src = get_tag_attr(tag, "src").unwrap_or_default();
+        let alt = get_tag_attr(tag, "alt");
+
+        console_debug!("SRC image content: {src}");
+        console_debug!("ALT image content: {alt:?}");
+
+        if let Some(alt) = alt {
+            printer.append_str(&format!("![{}]({})", alt, &src));
+        } else {
+            printer.append_str(&src);
+        }
+    }
+
+    fn after_handle(&mut self, _printer: &mut html2md::StructuredPrinter) {}
+}
+
+impl TagHandlerFactory for ImgHandler {
+    fn instantiate(&self) -> Box<dyn TagHandler> {
+        Box::new(ImgHandler)
+    }
 }
