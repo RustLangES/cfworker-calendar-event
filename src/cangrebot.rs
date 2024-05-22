@@ -25,6 +25,7 @@ En una hora @start@:
 @events@
 
 > **NOTA:** Haciendo click en cada evento pueden ver los detalles en el calendario
+> Y recuerda que puedes agregar el calendario para estar al dia de los eventos en Español desde [este enlace](<https://calendar.google.com/calendar/u/0?cid=ZGFmYzYyODQwMzRkOWJlZjNlMzFkZTNiZDE1OTI2OGQ5OGU4YzlhOGY2MjU3Mzk4NGI3MGE1OWQ2NjU3ZjVhZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t>)
 "#;
 
 async fn send(
