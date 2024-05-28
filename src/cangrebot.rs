@@ -13,8 +13,6 @@ use crate::EventDateType;
 
 const THREE_DAYS: &str = r#"@announce@
 
-@anuncios
-
 @description@@date@
 @hour@
 @location@@link@"#;
@@ -74,13 +72,13 @@ pub async fn build_message(
             .expect(&format!("Cannot parse date {}", e.start.date_time))
             .unix_timestamp();
         let msg = THREE_DAYS
-            .replace("@announce@", "📢 ¡Este martes 2 de abril!")
+            .replace("@announce@", "📢 ¡Atencion @anuncios !")
             .replace("@title@", &format!("**{}**", e.summary))
             .replace(
                 "@description@",
                 &e.description
                     .clone()
-                    .map(|d| format!("{}\n", html_to_md(&d)))
+                    .map(|d| format!("{}\n\n", html_to_md(&d)))
                     .unwrap_or_default(),
             )
             .replace("@date@", &format!("📅 Fecha: <t:{timestamp}:D>"))
