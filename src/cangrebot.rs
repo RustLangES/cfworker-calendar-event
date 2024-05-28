@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::marker::PhantomData;
 
 use html2md::common::get_tag_attr;
 use html2md::{parse_html_custom, TagHandler, TagHandlerFactory};
@@ -120,10 +121,15 @@ fn html_to_md(s: &str) -> String {
     let mut custom_parser: HashMap<String, Box<dyn TagHandlerFactory>> = HashMap::new();
     custom_parser
         .entry("img".to_owned())
-        .or_insert(Box::new(ImgHandler));
+        .or_insert(Box::new(DefaultFactory::<ImgHandler>::default()));
+    custom_parser
+        .entry("a".to_owned())
+        .or_insert(Box::new(DefaultFactory::<LinkHandler>::default()));
 
     parse_html_custom(s, &custom_parser)
 }
+
+#[derive(Default)]
 struct ImgHandler;
 impl TagHandler for ImgHandler {
     fn handle(&mut self, tag: &html2md::Handle, printer: &mut html2md::StructuredPrinter) {
@@ -143,8 +149,44 @@ impl TagHandler for ImgHandler {
     fn after_handle(&mut self, _printer: &mut html2md::StructuredPrinter) {}
 }
 
-impl TagHandlerFactory for ImgHandler {
+#[derive(Default)]
+struct LinkHandler {
+    start_pos: usize,
+    url: String
+}
+impl TagHandler for LinkHandler {
+
+    fn handle(&mut self, tag: &html2md::Handle, printer: &mut html2md::StructuredPrinter) {
+        self.start_pos = printer.data.len();
+
+        // try to extract a hyperlink
+        self.url = match tag.data {
+             html2md::NodeData::Element { ref attrs, .. } => {
+                let attrs = attrs.borrow();
+                let href = attrs.iter().find(|attr| attr.name.local.to_string() == "href");
+                match href {
+                    Some(link) => link.value.to_string(),
+                    None => "https://rustlang-es.org".to_owned()
+                }
+             }
+             _ => "https://rustlang-es.org".to_owned()
+        };
+    }
+
+    fn after_handle(&mut self, printer: &mut html2md::StructuredPrinter) {
+        // add braces around already present text, put an url afterwards
+        printer.insert_str(self.start_pos, "[");
+        printer.append_str(&format!("](<{}>)", self.url))
+    }
+}
+
+#[derive(Default)]
+struct DefaultFactory<T> {
+    _marker: PhantomData<T>,
+}
+impl<T> TagHandlerFactory for DefaultFactory<T>
+where T: 'static + Default + TagHandler {
     fn instantiate(&self) -> Box<dyn TagHandler> {
-        Box::new(ImgHandler)
+        Box::new(T::default())
     }
 }
