@@ -152,24 +152,25 @@ impl TagHandler for ImgHandler {
 #[derive(Default)]
 struct LinkHandler {
     start_pos: usize,
-    url: String
+    url: String,
 }
 impl TagHandler for LinkHandler {
-
     fn handle(&mut self, tag: &html2md::Handle, printer: &mut html2md::StructuredPrinter) {
         self.start_pos = printer.data.len();
 
         // try to extract a hyperlink
         self.url = match tag.data {
-             html2md::NodeData::Element { ref attrs, .. } => {
+            html2md::NodeData::Element { ref attrs, .. } => {
                 let attrs = attrs.borrow();
-                let href = attrs.iter().find(|attr| attr.name.local.to_string() == "href");
+                let href = attrs
+                    .iter()
+                    .find(|attr| attr.name.local.to_string() == "href");
                 match href {
                     Some(link) => link.value.to_string(),
-                    None => "https://rustlang-es.org".to_owned()
+                    None => "https://rustlang-es.org".to_owned(),
                 }
-             }
-             _ => "https://rustlang-es.org".to_owned()
+            }
+            _ => "https://rustlang-es.org".to_owned(),
         };
     }
 
@@ -185,7 +186,9 @@ struct DefaultFactory<T> {
     _marker: PhantomData<T>,
 }
 impl<T> TagHandlerFactory for DefaultFactory<T>
-where T: 'static + Default + TagHandler {
+where
+    T: 'static + Default + TagHandler,
+{
     fn instantiate(&self) -> Box<dyn TagHandler> {
         Box::new(T::default())
     }
