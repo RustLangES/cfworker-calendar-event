@@ -58,6 +58,7 @@ async fn send(
     console_debug!("Result: {res:?}");
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn build_message(
     client: &Client,
     endpoint: &str,
@@ -121,10 +122,10 @@ fn html_to_md(s: &str) -> String {
     let mut custom_parser: HashMap<String, Box<dyn TagHandlerFactory>> = HashMap::new();
     custom_parser
         .entry("img".to_owned())
-        .or_insert(Box::new(DefaultFactory::<ImgHandler>::default()));
+        .or_insert(Box::<DefaultFactory<ImgHandler>>::default());
     custom_parser
         .entry("a".to_owned())
-        .or_insert(Box::new(DefaultFactory::<LinkHandler>::default()));
+        .or_insert(Box::<DefaultFactory<LinkHandler>>::default());
 
     parse_html_custom(s, &custom_parser)
 }
@@ -190,6 +191,6 @@ where
     T: 'static + Default + TagHandler,
 {
     fn instantiate(&self) -> Box<dyn TagHandler> {
-        Box::new(T::default())
+        Box::<T>::default()
     }
 }
