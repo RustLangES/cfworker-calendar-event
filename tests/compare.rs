@@ -14,7 +14,7 @@ fn compare_dates_more_time() {
 fn compare_dates_three_days_fail() {
     let d = Date::from_calendar_date(2024, time::Month::May, 6).unwrap();
     let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
-    let res = compare_dates("2024-05-09T00:00:00Z", &d);
+    let res = compare_dates("2024-05-09T01:00:00Z", &d);
 
     assert!(res.is_none());
 }
@@ -31,8 +31,8 @@ fn compare_dates_three_days() {
 #[test]
 fn compare_dates_one_hour() {
     let d = Date::from_calendar_date(2024, time::Month::May, 9).unwrap();
-    let d = OffsetDateTime::new_utc(d, Time::MIDNIGHT);
-    let res = compare_dates("2024-05-09T01:10:00Z", &d);
+    let d = OffsetDateTime::new_utc(d, Time::from_hms(8, 0, 0).unwrap());
+    let res = compare_dates("2024-05-09T09:10:00Z", &d);
 
     assert_eq!(res, Some(EventDateType::OneHour));
 }

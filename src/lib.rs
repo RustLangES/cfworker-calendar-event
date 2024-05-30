@@ -1,7 +1,7 @@
 use reqwest::ClientBuilder;
 use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
-use worker::{event, Env, ScheduleContext, ScheduledEvent};
+use worker::{console_log, event, Env, ScheduleContext, ScheduledEvent};
 
 pub mod calendar;
 pub mod cangrebot;
@@ -116,20 +116,21 @@ pub async fn main(_e: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
 
 pub fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDateType> {
     let event_date = OffsetDateTime::parse(event_date, &Rfc3339)
-        .expect(&format!("Cannot parse date {event_date}"));
-    let diff = event_date.date() - now.date();
+        .expect(&format!("Cannot parse date {event_date}"))
+        .replace_minute(0)
+        .expect(&format!("Cannot replace minutes from event date"));
+    let days = event_date.checked_sub(Duration::days(3)).unwrap();
+    let hours = event_date.checked_sub(Duration::hours(1)).unwrap();
 
     #[cfg(target_arch = "wasm32")]
-    console_debug!(
-        "Days: {} - Hours: {}",
-        diff.whole_days(),
-        diff.whole_hours()
-    );
+    console_log!("Days new date: {days} - Now Date: {now}");
+    #[cfg(target_arch = "wasm32")]
+    console_log!("Hours new date: {hours} - Now Date: {now}");
 
-    if diff.whole_days() == 3 && now.hour() == 22 {
+    if days.day() == now.day() && now.hour() == 22 {
         return Some(EventDateType::ThreeDays);
     }
-    if diff.whole_hours() <= 1 && diff.whole_hours() >= 0 {
+    if hours == *now {
         return Some(EventDateType::OneHour);
     }
 
