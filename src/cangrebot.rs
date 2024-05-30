@@ -70,7 +70,7 @@ pub async fn build_message(
 ) {
     for (_, e) in three_days {
         let timestamp = OffsetDateTime::parse(&e.start.date_time, &Rfc3339)
-            .expect(&format!("Cannot parse date {}", e.start.date_time))
+            .unwrap_or_else(|err| panic!("Cannot parse date {}: {err}", e.start.date_time))
             .unix_timestamp();
         let msg = THREE_DAYS
             .replace("@announce@", "📢 ¡Atencion @anuncios !")
