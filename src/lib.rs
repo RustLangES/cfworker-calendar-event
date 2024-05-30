@@ -131,9 +131,9 @@ pub fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDate
         .unwrap_or_else(|_| panic!("Cannot replace nanoseconds from event date"));
     let now = now
         .replace_second(0)
-        .unwrap_or_else(|_| panic!("Cannot replace seconds from event date"))
+        .unwrap_or_else(|_| panic!("Cannot replace seconds from now date"))
         .replace_millisecond(0)
-        .unwrap_or_else(|_| panic!("Cannot replace milliseconds from event date"))
+        .unwrap_or_else(|_| panic!("Cannot replace milliseconds from now date"))
         .replace_nanosecond(0)
         .unwrap_or_else(|_| panic!("Cannot replace nanoseconds from event date"));
     let days = event_date.checked_sub(Duration::days(3)).unwrap();
