@@ -118,6 +118,8 @@ pub async fn build_message(
     send(client, endpoint, apikey, &msg, roles, bot_channel).await;
 }
 
+// This is safe because this fix is not on stable channel
+#[allow(clippy::unwrap_or_default)]
 fn html_to_md(s: &str) -> String {
     let mut custom_parser: HashMap<String, Box<dyn TagHandlerFactory>> = HashMap::new();
     custom_parser
