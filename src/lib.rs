@@ -122,7 +122,20 @@ pub fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDate
     let event_date = OffsetDateTime::parse(event_date, &Rfc3339)
         .unwrap_or_else(|e| panic!("Cannot parse date {e}"))
         .replace_minute(0)
-        .unwrap_or_else(|_| panic!("Cannot replace minutes from event date"));
+        .unwrap_or_else(|_| panic!("Cannot replace minutes from event date"))
+        .replace_second(0)
+        .unwrap_or_else(|_| panic!("Cannot replace seconds from event date"))
+        .replace_millisecond(0)
+        .unwrap_or_else(|_| panic!("Cannot replace milliseconds from event date"))
+        .replace_nanosecond(0)
+        .unwrap_or_else(|_| panic!("Cannot replace nanoseconds from event date"));
+    let now = now
+        .replace_second(0)
+        .unwrap_or_else(|_| panic!("Cannot replace seconds from event date"))
+        .replace_millisecond(0)
+        .unwrap_or_else(|_| panic!("Cannot replace milliseconds from event date"))
+        .replace_nanosecond(0)
+        .unwrap_or_else(|_| panic!("Cannot replace nanoseconds from event date"));
     let days = event_date.checked_sub(Duration::days(3)).unwrap();
     let hours = event_date.checked_sub(Duration::hours(1)).unwrap();
 
@@ -134,7 +147,7 @@ pub fn compare_dates(event_date: &str, now: &OffsetDateTime) -> Option<EventDate
     if days.day() == now.day() && now.hour() == 22 {
         return Some(EventDateType::ThreeDays);
     }
-    if hours == *now {
+    if hours == now {
         return Some(EventDateType::OneHour);
     }
 
