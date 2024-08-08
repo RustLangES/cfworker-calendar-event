@@ -24,7 +24,7 @@ in
     # fenix: rustup replacement for reproducible builds
     toolchain = fenix.${system}.fromToolchainFile {
       file = ./rust-toolchain.toml;
-      sha256 = "sha256-opUgs6ckUQCyDxcB9Wy51pqhd0MPGHUVbwRKKPGiwZU=";
+      sha256 = "sha256-6eN/GKzjVSjEhGO9FhWObkRFaE1Jf+uqMSdQnb8lcB4=";
     };
 
     # buildInputs for Examples
