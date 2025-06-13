@@ -1,49 +1,62 @@
-let
-  inherit
-    (builtins)
-    currentSystem
-    fromJSON
-    readFile
-    ;
-  getFlake = name:
-    with (fromJSON (readFile ./flake.lock)).nodes.${name}.locked; {
-      inherit rev;
-      outPath = fetchTarball {
-        url = "https://github.com/${owner}/${repo}/archive/${rev}.tar.gz";
-        sha256 = narHash;
-      };
-    };
-in
-  {
-    system ? currentSystem,
-    pkgs ? import (getFlake "nixpkgs") {localSystem = {inherit system;};},
-    lib ? pkgs.lib,
-    fenix,
-    ...
-  }: let
-    # fenix: rustup replacement for reproducible builds
-    toolchain = fenix.${system}.fromToolchainFile {
-      file = ./rust-toolchain.toml;
-      sha256 = "sha256-6eN/GKzjVSjEhGO9FhWObkRFaE1Jf+uqMSdQnb8lcB4=";
-    };
+{
+  pkgs,
+  lib ? pkgs.lib,
+  stdenv ? pkgs.stdenv,
+  crane,
+  fenix,
+  wrangler-fix,
+  ...
+}: let
+  # fenix: rustup replacement for reproducible builds
+  toolchain = fenix.fromToolchainFile {
+    file = ./rust-toolchain.toml;
+    sha256 = "sha256-KUm16pHj+cRedf8vxs/Hd2YWxpOrWZ7UOrwhILdSJBU=";
+  };
+  # crane: cargo and artifacts manager
+  craneLib = crane.overrideToolchain toolchain;
 
-    # buildInputs for Examples
-    buildInputs = with pkgs; [
+  nativeBuildInputs = with pkgs; [
+    worker-build
+    wasm-pack
+    wasm-bindgen-cli
+    binaryen
+  ];
+
+  buildInputs = with pkgs;
+    [
       openssl
+      pkg-config
+      autoPatchelfHook
+    ]
+    ++ lib.optionals stdenv.buildPlatform.isDarwin [
+      pkgs.libiconv
     ];
 
-  in {
-    # `nix develop`
-    devShells.default = pkgs.mkShell {
-      packages = with pkgs;
-        [
-          toolchain
-          pkg-config
-          worker-build
-          nodePackages.wrangler
-          binaryen
-        ]
-        ++ buildInputs;
-      LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
-    };
-  }
+  worker = craneLib.buildPackage {
+    doCheck = false;
+    src = craneLib.cleanCargoSource (craneLib.path ./.);
+    buildPhaseCargoCommand = "HOME=$(mktemp -d fake-homeXXXX) worker-build --release --mode no-install";
+
+    # Custom build command is provided, so this should be enabled
+    doNotPostBuildInstallCargoBinaries = true;
+
+    installPhaseCommand = ''
+      cp -r ./build $out
+    '';
+
+    nativeBuildInputs = with pkgs; [esbuild] ++ nativeBuildInputs;
+
+    inherit buildInputs;
+  };
+in {
+  # `nix build`
+  packages.default = worker;
+
+  # `nix develop`
+  devShells.default = craneLib.devShell {
+    packages =
+      nativeBuildInputs
+      ++ buildInputs
+      ++ [wrangler-fix.wrangler];
+  };
+}

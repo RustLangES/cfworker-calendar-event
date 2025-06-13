@@ -14,28 +14,47 @@ on:
       - "rust-toolchain.toml"
 
 jobs:
-  check:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: checks
-        run: |
-          cargo fmt --all --check
+  quality-gate:
+    uses: ./.github/workflows/quality-gate.yml
+    with:
+      checks-command: "--all --check"
+      clippy-command: "-- -D warnings"
+      tests-command: "test"
 
   deploy:
-    needs: [check]
-    runs-on: ubuntu-22.04
+    needs: [quality-gate]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Install worker-build
+
+      - name: Install nix
+        uses: nixbuild/nix-quick-install-action@v30
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: build-${{ runner.os }}-${{ hashFiles('**/*.nix', 'flake.lock') }}
+          restore-prefixes-first-match: build-${{ runner.os }}-
+
+      - name: Build nix
+        run: nix build
+
+      - name: Fix up wrangler toml
+        working-directory: .
         run: |
-          cargo install worker-build
+          echo "---- Before"
+          cat wrangler.toml
+          
+          cat wrangler.toml | sed 's/main = "build/main = "result/' | sed 's/command = "worker-build --release"/command = "echo dummy build"/' >| wrangler.prod.toml
+          
+          echo "---- After"
+          cat wrangler.prod.toml
+
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         env:
@@ -47,8 +66,10 @@ jobs:
           ROLES: ${{ secrets.ROLES }}
           BOT_APIKEY: ${{ secrets.BOT_APIKEY }}
         with:
+          wranglerVersion: "4.19.1"
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy -c wrangler.prod.toml
           secrets: |
             ENDPOINT
             BOT_APIKEY
